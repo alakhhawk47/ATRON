@@ -27,7 +27,7 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-app = FastAPI(title="ATRON API")
+app = FastAPI(title="ATRON API", redirect_slashes=False)
 
 JWT_ALGORITHM = "HS256"
 
@@ -178,7 +178,7 @@ async def get_me(request: Request):
     return await get_current_user(request)
 
 # ====== CLASS ENDPOINTS ======
-@class_router.get("/")
+@class_router.get("")
 async def list_classes(request: Request):
     user = await get_current_user(request)
     if user["role"] == "teacher":
@@ -199,7 +199,7 @@ async def list_classes(request: Request):
             cls["attendance_percentage"] = 0
     return classes
 
-@class_router.post("/")
+@class_router.post("")
 async def create_class(req: CreateClassRequest, request: Request):
     user = await get_current_user(request)
     if user["role"] != "teacher":
@@ -435,6 +435,7 @@ async def teacher_analytics(request: Request):
     total_students = 0
     total_sessions = 0
     total_records = 0
+    total_possible = 0
     class_stats = []
     for cls in classes:
         students = await db.class_members.count_documents({"class_id": cls["id"]})
@@ -443,9 +444,10 @@ async def teacher_analytics(request: Request):
         total_students += students
         total_sessions += sessions
         total_records += records
+        total_possible += students * sessions
         rate = round((records / (students * sessions)) * 100, 1) if students > 0 and sessions > 0 else 0
         class_stats.append({"class_name": cls["name"], "subject": cls["subject"], "students": students, "sessions": sessions, "attendance_rate": rate, "class_id": cls["id"]})
-    avg_rate = round((total_records / (total_students * total_sessions)) * 100, 1) if total_students > 0 and total_sessions > 0 else 0
+    avg_rate = round((total_records / total_possible) * 100, 1) if total_possible > 0 else 0
     today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
     today_sessions = await db.attendance_sessions.count_documents({"teacher_id": user["_id"], "started_at": {"$gte": today_start.isoformat()}})
     return {
