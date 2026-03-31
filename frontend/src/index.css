@@ -1,0 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 0 0% 5.5%;
+        --foreground: 0 0% 100%;
+        --card: 0 0% 7.5%;
+        --card-foreground: 0 0% 100%;
+        --popover: 0 0% 7.5%;
+        --popover-foreground: 0 0% 100%;
+        --primary: 195 100% 71%;
+        --primary-foreground: 195 100% 18%;
+        --secondary: 37 98% 51%;
+        --secondary-foreground: 0 0% 100%;
+        --muted: 0 0% 15%;
+        --muted-foreground: 0 0% 68%;
+        --accent: 0 0% 15%;
+        --accent-foreground: 0 0% 100%;
+        --destructive: 352 100% 72%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 0 0% 18%;
+        --input: 0 0% 18%;
+        --ring: 195 100% 71%;
+        --radius: 0.75rem;
+        --chart-1: 195 100% 71%;
+        --chart-2: 37 98% 51%;
+        --chart-3: 352 100% 72%;
+        --chart-4: 160 60% 45%;
+        --chart-5: 280 65% 60%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+    body {
+        @apply bg-background text-foreground font-body;
+        font-family: 'Manrope', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    h1, h2, h3, h4, h5, h6 {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+}
+
+@layer base {
+    [data-debug-wrapper="true"] {
+        display: contents !important;
+    }
+}
+
+@layer utilities {
+    .glass-card {
+        background: rgba(38, 38, 38, 0.5);
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+    }
+    .glass-panel {
+        background: rgba(19, 19, 19, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+    }
+    .text-gradient-primary {
+        background: linear-gradient(135deg, #69daff, #00cffc, #fd9d06);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .neon-glow {
+        box-shadow: 0 0 30px rgba(105, 218, 255, 0.3);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
