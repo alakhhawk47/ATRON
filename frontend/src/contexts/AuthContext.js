@@ -2,8 +2,11 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 import axios from 'axios';
 
 // Ensure HTTPS is used for API calls
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'https://zero-proxies.preview.emergentagent.com';
-const API = BACKEND_URL.replace('http://', 'https://') + '/api';
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
+if (!BACKEND_URL) {
+    console.error('REACT_APP_BACKEND_URL is not set');
+}
+const API = (BACKEND_URL || '').replace('http://', 'https://') + '/api';
 
 console.log('🔧 API Configuration:', { BACKEND_URL, API, env: process.env.REACT_APP_BACKEND_URL });
 

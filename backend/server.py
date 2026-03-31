@@ -188,12 +188,36 @@ async def list_classes(request: Request):
         class_ids = [m["class_id"] for m in memberships]
         classes = await db.classes.find({"id": {"$in": class_ids}}, {"_id": 0}).to_list(100)
 
+    class_ids = [cls["id"] for cls in classes]
+    # Batch aggregations instead of N+1 queries
+    student_counts = {}
+    async for doc in db.class_members.aggregate([
+        {"$match": {"class_id": {"$in": class_ids}}},
+        {"$group": {"_id": "$class_id", "count": {"$sum": 1}}}
+    ]):
+        student_counts[doc["_id"]] = doc["count"]
+
+    session_counts = {}
+    async for doc in db.attendance_sessions.aggregate([
+        {"$match": {"class_id": {"$in": class_ids}}},
+        {"$group": {"_id": "$class_id", "count": {"$sum": 1}}}
+    ]):
+        session_counts[doc["_id"]] = doc["count"]
+
+    attendance_counts = {}
+    if user["role"] == "student":
+        async for doc in db.attendance_records.aggregate([
+            {"$match": {"class_id": {"$in": class_ids}, "student_id": user["_id"]}},
+            {"$group": {"_id": "$class_id", "count": {"$sum": 1}}}
+        ]):
+            attendance_counts[doc["_id"]] = doc["count"]
+
     for cls in classes:
-        cls["student_count"] = await db.class_members.count_documents({"class_id": cls["id"]})
-        total_sessions = await db.attendance_sessions.count_documents({"class_id": cls["id"]})
+        cls["student_count"] = student_counts.get(cls["id"], 0)
+        total_sessions = session_counts.get(cls["id"], 0)
         cls["total_sessions"] = total_sessions
         if user["role"] == "student" and total_sessions > 0:
-            attended = await db.attendance_records.count_documents({"class_id": cls["id"], "student_id": user["_id"]})
+            attended = attendance_counts.get(cls["id"], 0)
             cls["attendance_percentage"] = round((attended / total_sessions) * 100, 1)
         else:
             cls["attendance_percentage"] = 0
@@ -257,9 +281,28 @@ async def get_class_students(class_id: str, request: Request):
     await get_current_user(request)
     members = await db.class_members.find({"class_id": class_id}, {"_id": 0}).to_list(200)
     total_sessions = await db.attendance_sessions.count_documents({"class_id": class_id})
+
+    # Batch: count attendance per student
+    attendance_map = {}
+    async for doc in db.attendance_records.aggregate([
+        {"$match": {"class_id": class_id}},
+        {"$group": {"_id": "$student_id", "count": {"$sum": 1}}}
+    ]):
+        attendance_map[doc["_id"]] = doc["count"]
+
+    # Batch: last attendance per student
+    last_att_map = {}
+    async for doc in db.attendance_records.aggregate([
+        {"$match": {"class_id": class_id}},
+        {"$sort": {"marked_at": -1}},
+        {"$group": {"_id": "$student_id", "last": {"$first": "$marked_at"}}}
+    ]):
+        last_att_map[doc["_id"]] = doc["last"]
+
     for member in members:
+        sid = member["student_id"]
+        attended = attendance_map.get(sid, 0)
         if total_sessions > 0:
-            attended = await db.attendance_records.count_documents({"class_id": class_id, "student_id": member["student_id"]})
             member["attendance_percentage"] = round((attended / total_sessions) * 100, 1)
             member["total_sessions"] = total_sessions
             member["attended_sessions"] = attended
@@ -267,11 +310,7 @@ async def get_class_students(class_id: str, request: Request):
             member["attendance_percentage"] = 0
             member["total_sessions"] = 0
             member["attended_sessions"] = 0
-        last_record = await db.attendance_records.find_one(
-            {"class_id": class_id, "student_id": member["student_id"]},
-            {"_id": 0}, sort=[("marked_at", -1)]
-        )
-        member["last_attendance"] = last_record["marked_at"] if last_record else None
+        member["last_attendance"] = last_att_map.get(sid, None)
     return members
 
 # ====== ATTENDANCE ENDPOINTS ======
@@ -380,9 +419,18 @@ async def get_class_report(class_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Class not found")
     members = await db.class_members.find({"class_id": class_id}, {"_id": 0}).to_list(200)
     total_sessions = await db.attendance_sessions.count_documents({"class_id": class_id})
+
+    # Batch: count attendance per student
+    attendance_map = {}
+    async for doc in db.attendance_records.aggregate([
+        {"$match": {"class_id": class_id}},
+        {"$group": {"_id": "$student_id", "count": {"$sum": 1}}}
+    ]):
+        attendance_map[doc["_id"]] = doc["count"]
+
     report_data = []
     for member in members:
-        attended = await db.attendance_records.count_documents({"class_id": class_id, "student_id": member["student_id"]})
+        attended = attendance_map.get(member["student_id"], 0)
         percentage = round((attended / total_sessions) * 100, 1) if total_sessions > 0 else 0
         report_data.append({
             "student_name": member["student_name"],
@@ -403,6 +451,15 @@ async def export_report(class_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Class not found")
     members = await db.class_members.find({"class_id": class_id}, {"_id": 0}).to_list(200)
     total_sessions = await db.attendance_sessions.count_documents({"class_id": class_id})
+
+    # Batch: count attendance per student
+    attendance_map = {}
+    async for doc in db.attendance_records.aggregate([
+        {"$match": {"class_id": class_id}},
+        {"$group": {"_id": "$student_id", "count": {"$sum": 1}}}
+    ]):
+        attendance_map[doc["_id"]] = doc["count"]
+
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Attendance Report"
@@ -413,7 +470,7 @@ async def export_report(class_id: str, request: Request):
     ws.append([])
     ws.append(["#", "Student Name", "Email", "Attended", "Absent", "Percentage"])
     for i, member in enumerate(members, 1):
-        attended = await db.attendance_records.count_documents({"class_id": class_id, "student_id": member["student_id"]})
+        attended = attendance_map.get(member["student_id"], 0)
         percentage = round((attended / total_sessions) * 100, 1) if total_sessions > 0 else 0
         ws.append([i, member["student_name"], member["student_email"], attended, total_sessions - attended, f"{percentage}%"])
     output = io.BytesIO()
@@ -432,15 +489,39 @@ async def teacher_analytics(request: Request):
     if user["role"] != "teacher":
         raise HTTPException(status_code=403, detail="Teacher access only")
     classes = await db.classes.find({"teacher_id": user["_id"]}, {"_id": 0}).to_list(100)
+    class_ids = [cls["id"] for cls in classes]
+
+    # Batch aggregations
+    student_counts = {}
+    async for doc in db.class_members.aggregate([
+        {"$match": {"class_id": {"$in": class_ids}}},
+        {"$group": {"_id": "$class_id", "count": {"$sum": 1}}}
+    ]):
+        student_counts[doc["_id"]] = doc["count"]
+
+    session_counts = {}
+    async for doc in db.attendance_sessions.aggregate([
+        {"$match": {"class_id": {"$in": class_ids}}},
+        {"$group": {"_id": "$class_id", "count": {"$sum": 1}}}
+    ]):
+        session_counts[doc["_id"]] = doc["count"]
+
+    record_counts = {}
+    async for doc in db.attendance_records.aggregate([
+        {"$match": {"class_id": {"$in": class_ids}}},
+        {"$group": {"_id": "$class_id", "count": {"$sum": 1}}}
+    ]):
+        record_counts[doc["_id"]] = doc["count"]
+
     total_students = 0
     total_sessions = 0
     total_records = 0
     total_possible = 0
     class_stats = []
     for cls in classes:
-        students = await db.class_members.count_documents({"class_id": cls["id"]})
-        sessions = await db.attendance_sessions.count_documents({"class_id": cls["id"]})
-        records = await db.attendance_records.count_documents({"class_id": cls["id"]})
+        students = student_counts.get(cls["id"], 0)
+        sessions = session_counts.get(cls["id"], 0)
+        records = record_counts.get(cls["id"], 0)
         total_students += students
         total_sessions += sessions
         total_records += records
@@ -467,13 +548,29 @@ async def student_analytics(request: Request):
     memberships = await db.class_members.find({"student_id": user["_id"]}, {"_id": 0}).to_list(100)
     class_ids = [m["class_id"] for m in memberships]
     classes = await db.classes.find({"id": {"$in": class_ids}}, {"_id": 0}).to_list(100)
+
+    # Batch aggregations
+    session_counts = {}
+    async for doc in db.attendance_sessions.aggregate([
+        {"$match": {"class_id": {"$in": class_ids}}},
+        {"$group": {"_id": "$class_id", "count": {"$sum": 1}}}
+    ]):
+        session_counts[doc["_id"]] = doc["count"]
+
+    attended_counts = {}
+    async for doc in db.attendance_records.aggregate([
+        {"$match": {"class_id": {"$in": class_ids}, "student_id": user["_id"]}},
+        {"$group": {"_id": "$class_id", "count": {"$sum": 1}}}
+    ]):
+        attended_counts[doc["_id"]] = doc["count"]
+
     total_sessions_all = 0
     total_attended_all = 0
     class_stats = []
     alerts = []
     for cls in classes:
-        total_sessions = await db.attendance_sessions.count_documents({"class_id": cls["id"]})
-        attended = await db.attendance_records.count_documents({"class_id": cls["id"], "student_id": user["_id"]})
+        total_sessions = session_counts.get(cls["id"], 0)
+        attended = attended_counts.get(cls["id"], 0)
         total_sessions_all += total_sessions
         total_attended_all += attended
         percentage = round((attended / total_sessions) * 100, 1) if total_sessions > 0 else 0
@@ -566,9 +663,15 @@ async def api_root():
 async def health():
     return {"status": "healthy"}
 
+cors_origins = os.environ.get('CORS_ORIGINS', '*')
+if cors_origins == '*':
+    allow_origins_list = ["*"]
+else:
+    allow_origins_list = [o.strip() for o in cors_origins.split(',')]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[os.environ.get("FRONTEND_URL", "http://localhost:3000"), "http://localhost:3000"],
+    allow_origins=allow_origins_list,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
