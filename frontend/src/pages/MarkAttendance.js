@@ -15,7 +15,7 @@ export default function MarkAttendance() {
         setMarking(true);
         setError("");
         try {
-            await api.post("/attendance/mark", { session_id: sessionId });
+            await api.post("/attendance/mark", { session_code: sessionId });
             setMarked(true);
         } catch (e) {
             setError(e.response?.data?.detail || "Failed to mark attendance");

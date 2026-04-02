@@ -47,7 +47,7 @@ export default function AttendanceSession() {
 
     const generateQR = async () => {
         if (!session) return;
-        const markUrl = `${window.location.origin}/attendance/mark/${session.session_id}`;
+        const markUrl = `${window.location.origin}/mark-attendance/${session.session_code}`;
         setQrUrl(markUrl);
         if (canvasRef.current) {
             await QRCode.toCanvas(canvasRef.current, markUrl, {
@@ -61,15 +61,15 @@ export default function AttendanceSession() {
     const pollAttendance = async () => {
         if (!session) return;
         try {
-            const { data } = await api.get(`/attendance/sessions/${session.session_id}/students`);
-            setStudents(data);
+            const { data } = await api.get(`/attendance/sessions/${session.id}`);
+            setStudents(data.records || []);
         } catch (e) { console.error(e); }
     };
 
     const endSession = async () => {
         setEnding(true);
         try {
-            await api.post(`/attendance/sessions/${session.session_id}/end`);
+            await api.put(`/attendance/sessions/${session.id}/end`);
             navigate(`/classes/${classId}`);
         } catch (e) {
             alert(e.response?.data?.detail || "Failed to end session");
@@ -177,15 +177,15 @@ export default function AttendanceSession() {
                                 students.map((s, i) => (
                                     <div key={i} data-testid={`checkin-${i}`} className="flex items-center gap-4 p-4 rounded-xl bg-neutral-900/50 border border-neutral-800/50 hover:border-cyan-400/20 transition-all">
                                         <div className="w-10 h-10 rounded-xl bg-cyan-400/20 flex items-center justify-center text-sm font-bold text-cyan-400">
-                                            {s.name?.charAt(0) || "S"}
+                                            {s.student_name?.charAt(0) || "S"}
                                         </div>
                                         <div className="flex-1">
-                                            <p className="font-bold text-sm">{s.name}</p>
-                                            <p className="text-xs text-neutral-500">{s.email}</p>
+                                            <p className="font-bold text-sm">{s.student_name}</p>
+                                            <p className="text-xs text-neutral-500">{s.student_email}</p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-cyan-400 font-bold">Verified</p>
-                                            <p className="text-[10px] text-neutral-600">{s.timestamp ? new Date(s.timestamp).toLocaleTimeString() : ""}</p>
+                                            <p className="text-[10px] text-neutral-600">{s.marked_at ? new Date(s.marked_at).toLocaleTimeString() : ""}</p>
                                         </div>
                                     </div>
                                 ))
@@ -208,7 +208,7 @@ function StudentMarkView({ session, api }) {
         setMarking(true);
         setError("");
         try {
-            await api.post("/attendance/mark", { session_id: session?.session_id });
+            await api.post("/attendance/mark", { session_code: session?.session_code });
             setMarked(true);
         } catch (e) {
             setError(e.response?.data?.detail || "Failed to mark attendance");
