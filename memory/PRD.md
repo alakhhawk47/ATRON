@@ -1,67 +1,44 @@
 # ATRON - Smart Attendance Management System
+## Product Requirements Document
 
-## Problem Statement
-Build ATRON, a modern SaaS web platform for smart university attendance management. Teachers create digital classrooms and start QR-based attendance sessions. Students join classes and mark attendance by scanning QR codes. System generates reports and analytics.
+### Problem Statement
+Build a smart university attendance management system (ATRON) that prevents proxy attendance using QR codes and digital sessions. UI must match the exact Stitch design provided by the user.
 
-## Architecture
-- **Frontend**: React + TailwindCSS + Shadcn/UI + Recharts
-- **Backend**: FastAPI (Python) 
-- **Database**: MongoDB
-- **Auth**: JWT (httpOnly cookies + Bearer token)
-- **QR Codes**: qrcode.react
-- **Excel Export**: openpyxl
+### Architecture
+- **Frontend**: React + TailwindCSS (dark theme, glass morphism, Material Symbols Outlined)
+- **Backend**: FastAPI + Motor (async MongoDB driver)
+- **Database**: MongoDB (users, classes, class_members, attendance_sessions, attendance_records)
+- **Auth**: JWT-based with bcrypt password hashing
 
-## User Personas
-1. **University Teachers** - Create classes, start attendance sessions, track analytics, export reports
-2. **College Students** - Join classes via codes, scan QR for attendance, track percentages
-3. **Administrators** (Future) - Monitor university-wide statistics
+### User Personas
+1. **Teachers** - Create classes, start QR attendance sessions, view reports/analytics
+2. **Students** - Join classes, scan QR codes to mark attendance, track percentage
+3. **Admins** (future) - Monitor university stats, manage departments
 
-## Core Requirements
-- Teacher: Create classes, generate join codes, start QR sessions, view reports/analytics, export Excel
-- Student: Join classes, scan QR attendance, view percentages and alerts
-- Auth: JWT-based email/password + future Google OAuth
-- Dark theme UI matching ATRON design (cyan #69daff, dark bg #0e0e0e)
+### Core Requirements (Static)
+- Class creation with auto-generated 6-digit codes
+- QR-based attendance sessions with live check-in feed
+- Role-based dashboards (teacher/student)
+- Attendance reports with Excel export
+- Analytics with weekly trends and subject comparisons
 
-## What's Been Implemented (March 2026)
-- Full auth system (register, login, logout, session management)
-- Teacher dashboard with stats (classes, students, attendance rate, sessions)
-- Student dashboard with attendance percentages, alerts
-- Class creation with auto-generated join codes
-- Class joining via codes
-- Attendance sessions with QR code display and live check-in feed
-- Mark attendance via QR scan URL
-- Reports page with student-level attendance data
-- Excel export of attendance reports
-- Analytics page with bar charts, pie charts, class performance
-- Class management with student list and attendance percentages
-- Seed data: 3 classes, 8 students, 30 attendance sessions
-- Dark theme ATRON design with Plus Jakarta Sans + Manrope fonts
-- Responsive layout with sidebar navigation
+### What's Been Implemented (April 2, 2026)
+- Full backend API: auth, classes, attendance, reports, analytics
+- Complete UI reskin matching Stitch design (dark theme, cyan/amber/red palette)
+- 15 pages: Landing, Login, Signup, Teacher Dashboard, Student Dashboard, Create Class, Join Class, Attendance Session, Mark Attendance, Class Management, Reports, Analytics
+- Glass morphism effects, Material Symbols Outlined icons
+- QR code generation with canvas
+- Excel export functionality
+- Testing: 100% backend (18/18), 100% frontend flows
 
-## Prioritized Backlog
-### P0 (Critical)
-- [x] Core auth flow
-- [x] Teacher/Student dashboards
-- [x] Class CRUD + join codes
-- [x] QR attendance sessions
-- [x] Reports + Excel export
+### Prioritized Backlog
+- **P0**: All core features implemented
+- **P1**: Google OAuth integration, Admin dashboard
+- **P2**: Geo-fencing for attendance verification, Push notifications
+- **P3**: Mobile-responsive PWA, LMS/ERP integration
 
-### P1 (Important)
-- [ ] Google OAuth integration
-- [ ] Password reset flow
-- [ ] Mobile-responsive QR scanner
-- [ ] Email notifications for low attendance
-
-### P2 (Nice to have)
-- [ ] Admin dashboard for university-wide stats
-- [ ] Department/course management
-- [ ] Geofence-based attendance verification
-- [ ] Attendance trends over time charts
-- [ ] Student bulk import via CSV
-
-## Next Tasks
-1. Add Google OAuth login (Emergent-managed)
-2. Implement password reset with email
-3. Add QR scanner for students (camera-based)
-4. Add more detailed analytics (weekly trends, subject comparison)
-5. Settings page for profile management
+### Next Tasks
+1. Add Google OAuth for social login
+2. Build Admin dashboard for university statistics
+3. Add attendance alerts (email/push notifications)
+4. Implement geo-fencing for proximity verification
