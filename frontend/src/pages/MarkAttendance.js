@@ -1,90 +1,82 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { Loader2, CheckCircle, XCircle, LogIn } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 export default function MarkAttendance() {
-    const { sessionCode } = useParams();
-    const { user, loading: authLoading, api } = useAuth();
+    const { sessionId } = useParams();
+    const { api, user } = useAuth();
     const navigate = useNavigate();
-    const [status, setStatus] = useState("loading"); // loading, success, error, login_required
-    const [message, setMessage] = useState("");
-
-    useEffect(() => {
-        if (authLoading) return;
-        if (!user) {
-            setStatus("login_required");
-            return;
-        }
-        if (user.role !== "student") {
-            setStatus("error");
-            setMessage("Only students can mark attendance");
-            return;
-        }
-        markAttendance();
-    }, [user, authLoading]);
+    const [marking, setMarking] = useState(false);
+    const [marked, setMarked] = useState(false);
+    const [error, setError] = useState("");
 
     const markAttendance = async () => {
+        setMarking(true);
+        setError("");
         try {
-            const { data } = await api.post("/attendance/mark", { session_code: sessionCode });
-            setStatus("success");
-            setMessage(data.message);
+            await api.post("/attendance/mark", { session_id: sessionId });
+            setMarked(true);
         } catch (e) {
-            setStatus("error");
-            setMessage(e.response?.data?.detail || "Failed to mark attendance");
-        }
+            setError(e.response?.data?.detail || "Failed to mark attendance");
+        } finally { setMarking(false); }
     };
 
+    useEffect(() => {
+        if (!user) return;
+        if (user.role === "teacher") {
+            navigate("/dashboard");
+        }
+    }, [user]);
+
+    if (marked) {
+        return (
+            <div className="min-h-screen bg-background text-white font-body flex items-center justify-center p-6">
+                <div className="glass-card rounded-[2rem] p-8 border border-cyan-400/20 text-center max-w-md">
+                    <div className="w-20 h-20 rounded-2xl bg-cyan-400/20 flex items-center justify-center mx-auto mb-6">
+                        <span className="material-symbols-outlined text-4xl text-cyan-400">check_circle</span>
+                    </div>
+                    <h2 className="font-headline text-3xl font-extrabold mb-2">You're In!</h2>
+                    <p className="text-neutral-400 mb-8">Your attendance has been recorded successfully.</p>
+                    <button onClick={() => navigate("/dashboard")}
+                        className="bg-gradient-to-r from-cyan-400 to-cyan-500 text-neutral-950 px-8 py-3 rounded-xl font-bold text-sm active:scale-[0.98] duration-200">
+                        Go to Dashboard
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="min-h-screen bg-background flex items-center justify-center px-6">
-            <div className="glass-card rounded-[2rem] p-10 border border-[#1a1a1a] max-w-md w-full text-center">
-                <h1 className="font-headline text-2xl font-extrabold mb-2">
-                    <span className="text-gradient-primary">ATRON</span>
-                </h1>
-                <p className="text-xs text-muted-foreground uppercase tracking-widest mb-8">Attendance Check-in</p>
+        <div className="min-h-screen bg-background text-white font-body flex items-center justify-center p-6 relative overflow-hidden">
+            <div className="absolute top-[-10%] left-[-5%] w-[40%] h-[40%] bg-cyan-500/10 rounded-full blur-[120px]" />
+            <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-red-500/10 rounded-full blur-[120px]" />
 
-                {status === "loading" && (
-                    <div data-testid="mark-loading">
-                        <Loader2 className="w-12 h-12 animate-spin text-primary mx-auto mb-4" />
-                        <p className="text-muted-foreground">Marking your attendance...</p>
+            <div className="glass-panel rounded-[2rem] p-8 border border-neutral-700/20 text-center max-w-md relative z-10 shadow-2xl">
+                <div className="mb-6">
+                    <span className="text-2xl font-black tracking-tighter text-cyan-400 font-headline">ATRON</span>
+                </div>
+                <span className="material-symbols-outlined text-6xl text-cyan-400 mb-4">touch_app</span>
+                <h2 className="font-headline text-2xl font-extrabold mb-2">Mark Your Attendance</h2>
+                <p className="text-neutral-500 mb-8">Tap below to confirm your presence in this session.</p>
+
+                {error && (
+                    <div data-testid="mark-error" className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-6 text-sm text-red-400 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-base">error</span>
+                        {error}
                     </div>
                 )}
 
-                {status === "success" && (
-                    <div data-testid="mark-success">
-                        <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
-                            <CheckCircle className="w-8 h-8 text-primary" />
-                        </div>
-                        <h3 className="font-headline text-xl font-bold mb-2 text-primary">Attendance Marked!</h3>
-                        <p className="text-sm text-muted-foreground mb-6">{message}</p>
-                        <Button className="bg-primary text-primary-foreground rounded-xl" onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
-                    </div>
-                )}
+                <button
+                    data-testid="confirm-attendance-btn"
+                    onClick={markAttendance}
+                    disabled={marking}
+                    className="bg-gradient-to-r from-cyan-400 to-cyan-500 text-neutral-950 px-8 py-4 rounded-xl font-bold text-base disabled:opacity-50 flex items-center justify-center gap-2 mx-auto w-full active:scale-[0.98] duration-200"
+                >
+                    {marking ? <Loader2 className="w-5 h-5 animate-spin" /> : <><span className="material-symbols-outlined text-xl">check_circle</span> Confirm Attendance</>}
+                </button>
 
-                {status === "error" && (
-                    <div data-testid="mark-error">
-                        <div className="w-16 h-16 rounded-full bg-destructive/20 flex items-center justify-center mx-auto mb-4">
-                            <XCircle className="w-8 h-8 text-destructive" />
-                        </div>
-                        <h3 className="font-headline text-xl font-bold mb-2 text-destructive">Error</h3>
-                        <p className="text-sm text-muted-foreground mb-6">{message}</p>
-                        <Button variant="outline" className="rounded-xl border-[#2a2a2a]" onClick={() => navigate("/dashboard")}>Go to Dashboard</Button>
-                    </div>
-                )}
-
-                {status === "login_required" && (
-                    <div data-testid="mark-login-required">
-                        <div className="w-16 h-16 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-4">
-                            <LogIn className="w-8 h-8 text-secondary" />
-                        </div>
-                        <h3 className="font-headline text-xl font-bold mb-2">Login Required</h3>
-                        <p className="text-sm text-muted-foreground mb-6">You need to sign in as a student to mark your attendance.</p>
-                        <Button className="bg-primary text-primary-foreground rounded-xl" onClick={() => navigate(`/login?redirect=/mark-attendance/${sessionCode}`)}>
-                            Sign In to Mark Attendance
-                        </Button>
-                    </div>
-                )}
+                <p className="text-xs text-neutral-600 mt-6">Secured by ATRON v2.0</p>
             </div>
         </div>
     );

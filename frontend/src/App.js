@@ -37,7 +37,8 @@ function AppRoutes() {
             <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />} />
             <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />} />
             <Route path="/signup" element={user ? <Navigate to="/dashboard" replace /> : <SignupPage />} />
-            <Route path="/mark-attendance/:sessionCode" element={<MarkAttendance />} />
+            <Route path="/attendance/mark/:sessionId" element={<MarkAttendance />} />
+            <Route path="/mark-attendance/:sessionId" element={<MarkAttendance />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout><Dashboard /></DashboardLayout></ProtectedRoute>} />
             <Route path="/classes" element={<ProtectedRoute><DashboardLayout><Dashboard /></DashboardLayout></ProtectedRoute>} />
             <Route path="/classes/create" element={<ProtectedRoute><DashboardLayout><CreateClass /></DashboardLayout></ProtectedRoute>} />
