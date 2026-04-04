@@ -29,12 +29,36 @@ db = client[os.environ['DB_NAME']]
 
 app = FastAPI(title="ATRON API", redirect_slashes=False)
 
+# ====== CORS MIDDLEWARE ======
+# Must be added immediately after app creation for cross-origin requests
+cors_origins = os.environ.get('CORS_ORIGINS', '*')
+if cors_origins == '*':
+    # In production with credentials, wildcard is invalid per CORS spec.
+    # Allow common Vercel patterns + fallback origins.
+    allow_origins_list = [
+        "https://atron.vercel.app",
+        "https://atron-frontend.vercel.app",
+        "https://atron-git-main.vercel.app",
+    ]
+    # Also allow any Vercel preview URLs via regex in the future
+else:
+    allow_origins_list = [o.strip() for o in cors_origins.split(',')]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allow_origins_list,
+    allow_origin_regex=r"https://atron.*\.vercel\.app",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 @app.get("/")
 async def root():
     return {"message": "ATRON backend running"}
 
 @app.get("/health")
-async def health():
+async def health_check():
     return {"status": "ok"}
 
 JWT_ALGORITHM = "HS256"
@@ -138,8 +162,8 @@ async def register(req: RegisterRequest, response: Response):
     user_id = str(result.inserted_id)
     access_token = create_access_token(user_id, email)
     refresh_token = create_refresh_token(user_id)
-    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=False, samesite="lax", max_age=86400, path="/")
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=False, samesite="lax", max_age=604800, path="/")
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="none", max_age=86400, path="/")
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
     return {"_id": user_id, "email": email, "name": req.name, "role": req.role, "token": access_token}
 
 @auth_router.post("/login")
@@ -171,8 +195,8 @@ async def login(req: LoginRequest, response: Response, request: Request):
     user_id = str(user["_id"])
     access_token = create_access_token(user_id, email)
     refresh_token = create_refresh_token(user_id)
-    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=False, samesite="lax", max_age=86400, path="/")
-    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=False, samesite="lax", max_age=604800, path="/")
+    response.set_cookie(key="access_token", value=access_token, httponly=True, secure=True, samesite="none", max_age=86400, path="/")
+    response.set_cookie(key="refresh_token", value=refresh_token, httponly=True, secure=True, samesite="none", max_age=604800, path="/")
     return {"_id": user_id, "email": email, "name": user["name"], "role": user["role"], "token": access_token}
 
 @auth_router.post("/logout")
@@ -668,19 +692,5 @@ async def api_root():
     return {"message": "ATRON API v1.0"}
 
 @app.get("/api/health")
-async def health():
+async def api_health():
     return {"status": "healthy"}
-
-cors_origins = os.environ.get('CORS_ORIGINS', '*')
-if cors_origins == '*':
-    allow_origins_list = ["*"]
-else:
-    allow_origins_list = [o.strip() for o in cors_origins.split(',')]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=allow_origins_list,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
