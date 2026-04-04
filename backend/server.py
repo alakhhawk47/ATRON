@@ -29,6 +29,14 @@ db = client[os.environ['DB_NAME']]
 
 app = FastAPI(title="ATRON API", redirect_slashes=False)
 
+@app.get("/")
+async def root():
+    return {"message": "ATRON backend running"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
 JWT_ALGORITHM = "HS256"
 
 def get_jwt_secret():
