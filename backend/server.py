@@ -31,23 +31,14 @@ app = FastAPI(title="ATRON API", redirect_slashes=False)
 
 # ====== CORS MIDDLEWARE ======
 # Must be added immediately after app creation for cross-origin requests
-cors_origins = os.environ.get('CORS_ORIGINS', '*')
-if cors_origins == '*':
-    # In production with credentials, wildcard is invalid per CORS spec.
-    # Allow common Vercel patterns + fallback origins.
-    allow_origins_list = [
-        "https://atron.vercel.app",
-        "https://atron-frontend.vercel.app",
-        "https://atron-git-main.vercel.app",
-    ]
-    # Also allow any Vercel preview URLs via regex in the future
-else:
-    allow_origins_list = [o.strip() for o in cors_origins.split(',')]
+origins = [
+    "https://atron-924h5jjpd-alakhhawk47s-projects.vercel.app",
+    "http://localhost:3000",
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=allow_origins_list,
-    allow_origin_regex=r"https://atron.*\.vercel\.app",
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
