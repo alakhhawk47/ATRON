@@ -1,14 +1,11 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config';
 
-// Ensure HTTPS is used for API calls
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-if (!BACKEND_URL) {
-    console.error('REACT_APP_BACKEND_URL is not set');
-}
-const API = (BACKEND_URL || '').replace('http://', 'https://') + '/api';
+// Use the shared production backend URL from config
+const API = `${API_BASE_URL}/api`;
 
-console.log('🔧 API Configuration:', { BACKEND_URL, API, env: process.env.REACT_APP_BACKEND_URL });
+console.log('🔧 API Configuration:', { API_BASE_URL, API });
 
 const api = axios.create({ baseURL: API, withCredentials: true });
 
