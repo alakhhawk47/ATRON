@@ -5,7 +5,7 @@ ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
 from fastapi import FastAPI, APIRouter, Request, HTTPException, Response
-from starlette.middleware.cors import CORSMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
@@ -32,8 +32,10 @@ app = FastAPI(title="ATRON API", redirect_slashes=False)
 # ====== CORS MIDDLEWARE ======
 # Must be added immediately after app creation for cross-origin requests
 origins = [
-    "https://atron-924h5jjpd-alakhhawk47s-projects.vercel.app",
+    "https://atron-two.vercel.app",
+    "https://atron-two.vercel.app/",
     "http://localhost:3000",
+    "http://localhost:5173",
 ]
 
 app.add_middleware(
