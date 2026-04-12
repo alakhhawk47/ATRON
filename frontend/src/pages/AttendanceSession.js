@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import QRCode from "qrcode";
 import { Loader2 } from "lucide-react";
 
 export default function AttendanceSession() {
     const { classId } = useParams();
     const { api, user } = useAuth();
+    const { theme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
     const canvasRef = useRef(null);
@@ -30,7 +32,7 @@ export default function AttendanceSession() {
             const pollInterval = setInterval(pollAttendance, 5000);
             return () => clearInterval(pollInterval);
         }
-    }, [session]);
+    }, [session, theme]);
 
     const loadInitialData = async () => {
         try {
@@ -50,10 +52,11 @@ export default function AttendanceSession() {
         const markUrl = `${window.location.origin}/mark-attendance/${session.session_code}`;
         setQrUrl(markUrl);
         if (canvasRef.current) {
+            const qrColor = theme === 'light' ? "#6B5B95" : "#69daff";
             await QRCode.toCanvas(canvasRef.current, markUrl, {
                 width: 280,
                 margin: 2,
-                color: { dark: "#69daff", light: "#00000000" }
+                color: { dark: qrColor, light: "#00000000" }
             });
         }
     };
@@ -82,9 +85,8 @@ export default function AttendanceSession() {
         return `${m.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
     };
 
-    if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-cyan-400" /></div>;
+    if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
-    // For student view - mark attendance
     if (user?.role === "student") {
         return <StudentMarkView session={session} api={api} />;
     }
@@ -94,98 +96,95 @@ export default function AttendanceSession() {
     const absentCount = totalStudents - presentCount;
 
     return (
-        <div data-testid="attendance-session" className="space-y-8">
+        <div data-testid="attendance-session" className="space-y-6 sm:space-y-8">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
-                    <button onClick={() => navigate(`/classes/${classId}`)} className="text-sm text-neutral-500 hover:text-white mb-4 flex items-center gap-1 transition-colors">
+                    <button onClick={() => navigate(`/classes/${classId}`)} className="text-sm text-muted-foreground hover:text-foreground mb-4 flex items-center gap-1 transition-colors">
                         <span className="material-symbols-outlined text-base">arrow_back</span> Back to Class
                     </button>
-                    <h1 className="font-headline font-black text-3xl tracking-tight">{classInfo?.name || "Attendance Session"}</h1>
-                    <p className="text-neutral-500 text-sm mt-1">Active QR session in progress</p>
+                    <h1 className="font-headline font-black text-2xl sm:text-3xl tracking-tight">{classInfo?.name || "Attendance Session"}</h1>
+                    <p className="text-muted-foreground text-sm mt-1">Active QR session in progress</p>
                 </div>
                 <button
                     data-testid="end-session-btn"
                     onClick={endSession}
                     disabled={ending}
-                    className="flex items-center gap-2 px-6 py-3 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 font-bold text-sm transition-all"
+                    className="flex items-center gap-2 px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 hover:bg-destructive/20 font-bold text-sm transition-all"
                 >
                     {ending ? <Loader2 className="w-4 h-4 animate-spin" /> : <span className="material-symbols-outlined text-lg">stop_circle</span>}
                     End Session
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8">
                 {/* QR Panel */}
-                <div className="lg:col-span-5 glass-card rounded-[2rem] p-8 border border-cyan-400/20 text-center ghost-border">
-                    {/* Timer Ring */}
+                <div className="lg:col-span-5 glass-card rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-8 border border-primary/20 text-center ghost-border">
                     <div className="mb-6">
-                        <div className="relative w-32 h-32 mx-auto flex items-center justify-center">
+                        <div className="relative w-28 sm:w-32 h-28 sm:h-32 mx-auto flex items-center justify-center">
                             <svg className="absolute inset-0 w-full h-full -rotate-90">
-                                <circle cx="64" cy="64" r="58" stroke="rgba(105,218,255,0.1)" strokeWidth="4" fill="none" />
-                                <circle cx="64" cy="64" r="58" stroke="#69daff" strokeWidth="4" fill="none"
+                                <circle cx="50%" cy="50%" r="45%" stroke="hsl(var(--primary) / 0.1)" strokeWidth="4" fill="none" />
+                                <circle cx="50%" cy="50%" r="45%" stroke="hsl(var(--primary))" strokeWidth="4" fill="none"
                                     strokeDasharray={`${2 * Math.PI * 58}`}
                                     strokeDashoffset={`${2 * Math.PI * 58 * (1 - (elapsed % 3600) / 3600)}`}
                                     strokeLinecap="round" className="transition-all duration-1000" />
                             </svg>
                             <div className="text-center">
-                                <p className="text-2xl font-headline font-extrabold text-cyan-400">{formatTime(elapsed)}</p>
-                                <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Active</p>
+                                <p className="text-xl sm:text-2xl font-headline font-extrabold text-primary">{formatTime(elapsed)}</p>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Active</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* QR Code */}
-                    <div className="bg-neutral-900/80 rounded-2xl p-6 mb-6 inline-block">
+                    <div className="bg-muted/30 rounded-2xl p-4 sm:p-6 mb-6 inline-block">
                         <canvas ref={canvasRef} data-testid="qr-canvas" />
                     </div>
 
-                    {/* Stats */}
-                    <div className="grid grid-cols-3 gap-4 mt-6">
-                        <div className="bg-cyan-400/10 rounded-xl py-3">
-                            <p className="text-2xl font-headline font-extrabold text-cyan-400">{presentCount}</p>
-                            <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Present</p>
+                    <div className="grid grid-cols-3 gap-3 sm:gap-4 mt-6">
+                        <div className="bg-primary/10 rounded-xl py-3">
+                            <p className="text-xl sm:text-2xl font-headline font-extrabold text-primary">{presentCount}</p>
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wider">Present</p>
                         </div>
-                        <div className="bg-red-400/10 rounded-xl py-3">
-                            <p className="text-2xl font-headline font-extrabold text-red-400">{absentCount}</p>
-                            <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Absent</p>
+                        <div className="bg-destructive/10 rounded-xl py-3">
+                            <p className="text-xl sm:text-2xl font-headline font-extrabold text-destructive">{absentCount}</p>
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wider">Absent</p>
                         </div>
-                        <div className="bg-amber-400/10 rounded-xl py-3">
-                            <p className="text-2xl font-headline font-extrabold text-amber-400">0</p>
-                            <p className="text-[10px] text-neutral-500 uppercase tracking-wider">Flagged</p>
+                        <div className="bg-secondary/10 rounded-xl py-3">
+                            <p className="text-xl sm:text-2xl font-headline font-extrabold text-secondary">0</p>
+                            <p className="text-[9px] sm:text-[10px] text-muted-foreground uppercase tracking-wider">Flagged</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Live Feed */}
                 <div className="lg:col-span-7">
-                    <div className="glass-card rounded-[2rem] p-8 border border-neutral-800/50">
-                        <div className="flex items-center justify-between mb-6">
-                            <h3 className="font-headline text-xl font-bold flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                    <div className="glass-card rounded-[1.5rem] sm:rounded-[2rem] p-6 sm:p-8 border border-border/50">
+                        <div className="flex items-center justify-between mb-4 sm:mb-6">
+                            <h3 className="font-headline text-lg sm:text-xl font-bold flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                                 Live Check-in Feed
                             </h3>
-                            <span className="text-xs text-neutral-500">{presentCount} of {totalStudents} checked in</span>
+                            <span className="text-xs text-muted-foreground">{presentCount} of {totalStudents} checked in</span>
                         </div>
                         <div className="space-y-2 max-h-[400px] overflow-y-auto no-scrollbar">
                             {students.length === 0 ? (
                                 <div className="text-center py-12">
-                                    <span className="material-symbols-outlined text-4xl text-neutral-700 mb-4">hourglass_empty</span>
-                                    <p className="text-neutral-500">Waiting for students to check in...</p>
+                                    <span className="material-symbols-outlined text-4xl text-muted-foreground/30 mb-4">hourglass_empty</span>
+                                    <p className="text-muted-foreground">Waiting for students to check in...</p>
                                 </div>
                             ) : (
                                 students.map((s, i) => (
-                                    <div key={i} data-testid={`checkin-${i}`} className="flex items-center gap-4 p-4 rounded-xl bg-neutral-900/50 border border-neutral-800/50 hover:border-cyan-400/20 transition-all">
-                                        <div className="w-10 h-10 rounded-xl bg-cyan-400/20 flex items-center justify-center text-sm font-bold text-cyan-400">
+                                    <div key={i} data-testid={`checkin-${i}`} className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-muted/20 border border-border/50 hover:border-primary/20 transition-all">
+                                        <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl bg-primary/20 flex items-center justify-center text-xs sm:text-sm font-bold text-primary">
                                             {s.student_name?.charAt(0) || "S"}
                                         </div>
-                                        <div className="flex-1">
-                                            <p className="font-bold text-sm">{s.student_name}</p>
-                                            <p className="text-xs text-neutral-500">{s.student_email}</p>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-bold text-sm truncate">{s.student_name}</p>
+                                            <p className="text-xs text-muted-foreground truncate">{s.student_email}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-xs text-cyan-400 font-bold">Verified</p>
-                                            <p className="text-[10px] text-neutral-600">{s.marked_at ? new Date(s.marked_at).toLocaleTimeString() : ""}</p>
+                                            <p className="text-xs text-primary font-bold">Verified</p>
+                                            <p className="text-[10px] text-muted-foreground">{s.marked_at ? new Date(s.marked_at).toLocaleTimeString() : ""}</p>
                                         </div>
                                     </div>
                                 ))
@@ -218,13 +217,13 @@ function StudentMarkView({ session, api }) {
     if (marked) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <div className="glass-card rounded-[2rem] p-8 border border-cyan-400/20 text-center max-w-md">
-                    <div className="w-16 h-16 rounded-2xl bg-cyan-400/20 flex items-center justify-center mx-auto mb-6">
-                        <span className="material-symbols-outlined text-3xl text-cyan-400">check_circle</span>
+                <div className="glass-card rounded-[2rem] p-8 border border-primary/20 text-center max-w-md">
+                    <div className="w-16 h-16 rounded-2xl bg-primary/20 flex items-center justify-center mx-auto mb-6">
+                        <span className="material-symbols-outlined text-3xl text-primary">check_circle</span>
                     </div>
                     <h2 className="font-headline text-2xl font-extrabold mb-2">Attendance Marked!</h2>
-                    <p className="text-neutral-500 mb-6">You have been marked as present.</p>
-                    <button onClick={() => navigate("/dashboard")} className="bg-gradient-to-r from-cyan-400 to-cyan-500 text-neutral-950 px-8 py-3 rounded-xl font-bold text-sm">
+                    <p className="text-muted-foreground mb-6">You have been marked as present.</p>
+                    <button onClick={() => navigate("/dashboard")} className="theme-btn-primary px-8 py-3 rounded-xl text-sm">
                         Go to Dashboard
                     </button>
                 </div>
@@ -234,15 +233,15 @@ function StudentMarkView({ session, api }) {
 
     return (
         <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="glass-card rounded-[2rem] p-8 border border-neutral-800/50 text-center max-w-md">
-                <span className="material-symbols-outlined text-5xl text-cyan-400 mb-6">touch_app</span>
+            <div className="glass-card rounded-[2rem] p-8 border border-border/50 text-center max-w-md">
+                <span className="material-symbols-outlined text-5xl text-primary mb-6">touch_app</span>
                 <h2 className="font-headline text-2xl font-extrabold mb-2">Mark Your Attendance</h2>
-                <p className="text-neutral-500 mb-6">Tap below to confirm your presence in this session.</p>
+                <p className="text-muted-foreground mb-6">Tap below to confirm your presence in this session.</p>
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 mb-6 text-sm text-red-400">{error}</div>
+                    <div className="bg-destructive/10 border border-destructive/20 rounded-xl px-4 py-3 mb-6 text-sm text-destructive">{error}</div>
                 )}
                 <button data-testid="mark-attendance-btn" onClick={markAttendance} disabled={marking}
-                    className="bg-gradient-to-r from-cyan-400 to-cyan-500 text-neutral-950 px-8 py-3 rounded-xl font-bold text-sm disabled:opacity-50 flex items-center justify-center gap-2 mx-auto">
+                    className="theme-btn-primary px-8 py-3 rounded-xl text-sm disabled:opacity-50 flex items-center justify-center gap-2 mx-auto">
                     {marking ? <Loader2 className="w-5 h-5 animate-spin" /> : <><span className="material-symbols-outlined text-lg">check_circle</span> Confirm Attendance</>}
                 </button>
             </div>

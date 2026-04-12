@@ -5,6 +5,9 @@
 @tailwind utilities;
 
 @layer base {
+    /* ═══════════════════════════════════════════════
+       DARK MODE (default)
+       ═══════════════════════════════════════════════ */
     :root {
         --background: 228 59% 6%;
         --foreground: 0 0% 100%;
@@ -31,6 +34,38 @@
         --chart-3: 352 100% 72%;
         --chart-4: 160 60% 45%;
         --chart-5: 280 65% 60%;
+    }
+
+    /* ═══════════════════════════════════════════════
+       LIGHT MODE
+       Warm cream/beige + purple + olive palette
+       from Stitch designs
+       ═══════════════════════════════════════════════ */
+    .light {
+        --background: 42 30% 93%;
+        --foreground: 30 10% 15%;
+        --card: 40 28% 97%;
+        --card-foreground: 30 10% 15%;
+        --popover: 40 28% 97%;
+        --popover-foreground: 30 10% 15%;
+        --primary: 270 30% 42%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 55 30% 50%;
+        --secondary-foreground: 0 0% 100%;
+        --muted: 42 22% 88%;
+        --muted-foreground: 30 10% 45%;
+        --accent: 270 25% 92%;
+        --accent-foreground: 270 30% 30%;
+        --destructive: 0 65% 50%;
+        --destructive-foreground: 0 0% 100%;
+        --border: 40 15% 82%;
+        --input: 40 15% 82%;
+        --ring: 270 30% 42%;
+        --chart-1: 270 30% 42%;
+        --chart-2: 55 30% 50%;
+        --chart-3: 0 65% 55%;
+        --chart-4: 160 40% 42%;
+        --chart-5: 195 60% 50%;
     }
 }
 
@@ -62,34 +97,75 @@
     .font-body {
         font-family: 'Manrope', sans-serif;
     }
+
+    /* ── Glass Cards ─────────────────────────────── */
     .glass-card {
         background: rgba(38, 38, 38, 0.5);
         backdrop-filter: blur(24px);
         -webkit-backdrop-filter: blur(24px);
     }
+    .light .glass-card {
+        background: rgba(255, 255, 255, 0.75);
+        box-shadow: 0 2px 16px rgba(107, 91, 149, 0.06), 0 1px 4px rgba(0,0,0,0.04);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+
     .glass-panel {
         background: rgba(19, 19, 19, 0.8);
         backdrop-filter: blur(20px);
         -webkit-backdrop-filter: blur(20px);
     }
+    .light .glass-panel {
+        background: rgba(255, 255, 255, 0.85);
+        box-shadow: 0 4px 24px rgba(107, 91, 149, 0.08);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* ── Gradient Texts ──────────────────────────── */
     .text-gradient-primary {
         background: linear-gradient(135deg, #69daff, #00cffc, #fd9d06);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
+    .light .text-gradient-primary {
+        background: linear-gradient(135deg, #6B5B95, #8B7BAF, #7A6F4E);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
     .editorial-text {
         background: linear-gradient(135deg, #69daff 0%, #ffffff 40%, #fd9d06 70%, #fd4b6c 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
+    .light .editorial-text {
+        background: linear-gradient(135deg, #3D2F5C 0%, #6B5B95 40%, #7A6F4E 70%, #5C573D 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* ── Glow Effects ────────────────────────────── */
     .neon-glow {
         box-shadow: 0 0 30px rgba(105, 218, 255, 0.3);
     }
+    .light .neon-glow {
+        box-shadow: 0 4px 20px rgba(107, 91, 149, 0.25);
+    }
+
     .neon-glow-primary {
         box-shadow: 0 0 40px rgba(105, 218, 255, 0.15), 0 0 80px rgba(105, 218, 255, 0.05);
     }
+    .light .neon-glow-primary {
+        box-shadow: 0 4px 24px rgba(107, 91, 149, 0.1), 0 1px 6px rgba(0,0,0,0.04);
+    }
+
+    /* ── Ghost Border ────────────────────────────── */
     .ghost-border {
         border: 1px solid transparent;
         background-clip: padding-box;
@@ -108,9 +184,18 @@
         mask-composite: exclude;
         pointer-events: none;
     }
+    .light .ghost-border::before {
+        background: linear-gradient(135deg, rgba(107,91,149,0.2), transparent, rgba(122,111,78,0.2));
+    }
+
     .kinetic-gradient {
         background: linear-gradient(135deg, rgba(105,218,255,0.05), rgba(253,157,6,0.03), rgba(253,75,108,0.03));
     }
+    .light .kinetic-gradient {
+        background: linear-gradient(135deg, rgba(107,91,149,0.04), rgba(122,111,78,0.03), rgba(200,190,170,0.03));
+    }
+
+    /* ── Scrollbar + Material Icons ──────────────── */
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
@@ -120,5 +205,92 @@
     }
     .material-symbols-outlined {
         font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+    }
+
+    /* ── Theme-aware Component Classes ────────────
+       These provide convenient single-class styling
+       that auto-adapts to the current theme
+       ─────────────────────────────────────────────── */
+
+    /* Nav bar */
+    .theme-nav {
+        @apply bg-neutral-950/60 backdrop-blur-xl border-b border-neutral-800/50;
+        box-shadow: 0 8px 32px 0 rgba(0,0,0,0.36);
+    }
+    .light .theme-nav {
+        @apply bg-white/70 backdrop-blur-xl border-b border-neutral-200/60;
+        box-shadow: 0 2px 12px rgba(107, 91, 149, 0.06);
+    }
+
+    /* Sidebar */
+    .theme-sidebar {
+        @apply bg-neutral-900/80 backdrop-blur-2xl border-r border-neutral-800/50;
+    }
+    .light .theme-sidebar {
+        @apply bg-white/80 backdrop-blur-2xl border-r border-neutral-200/50;
+    }
+
+    /* Input fields */
+    .theme-input {
+        @apply bg-neutral-900/80 border border-neutral-700/30 text-white placeholder:text-neutral-600;
+    }
+    .light .theme-input {
+        @apply bg-white border border-neutral-300/60 text-neutral-900 placeholder:text-neutral-400;
+    }
+
+    /* Buttons – primary */
+    .theme-btn-primary {
+        @apply bg-gradient-to-r from-cyan-400 to-cyan-500 text-neutral-950 font-bold;
+    }
+    .light .theme-btn-primary {
+        @apply bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold;
+    }
+
+    /* Buttons – outline */
+    .theme-btn-outline {
+        @apply border border-neutral-700 text-white;
+    }
+    .light .theme-btn-outline {
+        @apply border border-neutral-300 text-neutral-700;
+    }
+
+    /* Primary color text */
+    .theme-primary {
+        @apply text-cyan-400;
+    }
+    .light .theme-primary {
+        @apply text-purple-700;
+    }
+
+    /* Secondary color text */
+    .theme-secondary {
+        @apply text-amber-400;
+    }
+    .light .theme-secondary {
+        @apply text-yellow-700;
+    }
+
+    /* Muted text */
+    .theme-muted {
+        @apply text-neutral-500;
+    }
+    .light .theme-muted {
+        @apply text-neutral-500;
+    }
+
+    /* Card border variants */
+    .theme-card-border {
+        @apply border border-neutral-800/50;
+    }
+    .light .theme-card-border {
+        @apply border border-neutral-200/80;
+    }
+
+    /* Subtle bg for stat icons */
+    .theme-icon-bg-primary {
+        @apply bg-cyan-400/10;
+    }
+    .light .theme-icon-bg-primary {
+        @apply bg-purple-100;
     }
 }
