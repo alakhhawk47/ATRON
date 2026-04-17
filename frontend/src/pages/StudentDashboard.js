@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Loader2 } from "lucide-react";
+import PageHeader from "@/components/PageHeader";
+import StatCard from "@/components/StatCard";
 
 export default function StudentDashboard() {
     const { api, user } = useAuth();
@@ -24,66 +26,43 @@ export default function StudentDashboard() {
         finally { setLoading(false); }
     };
 
-    if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+    if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 animate-spin text-[#6D5AC1]" /></div>;
 
     const overallPct = analytics?.overall_attendance || 0;
 
     return (
         <div data-testid="student-dashboard" className="space-y-6 sm:space-y-8">
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 sm:gap-6">
-                <div>
-                    <p className="text-muted-foreground text-sm mb-1">Welcome back,</p>
-                    <h1 className="font-headline font-black text-2xl sm:text-3xl tracking-tight">
-                        Hello, <span className="text-primary">{user?.name?.split(' ')[0]}</span>
-                    </h1>
-                    <p className="text-muted-foreground text-sm mt-2">Track your attendance and stay on top of your classes.</p>
-                </div>
+            <PageHeader
+                title={<>Hello, <span className="text-[#6D5AC1]">{user?.name?.split(' ')[0]}</span></>}
+                subtitle="Track your attendance and stay on top of your classes."
+            >
                 <button
                     data-testid="join-class-btn"
                     onClick={() => navigate("/classes/join")}
-                    className="inline-flex items-center gap-2 theme-btn-primary px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl text-sm active:scale-[0.98] duration-200"
+                    className="inline-flex items-center gap-2 theme-btn-primary px-6 sm:px-7 py-2.5 sm:py-3 text-sm active:scale-[0.98] duration-200"
                 >
                     <span className="material-symbols-outlined text-lg">add_circle</span>
                     Join a Class
                 </button>
-            </div>
+            </PageHeader>
 
             {/* Stats Cards */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-                <div className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-primary/20">
-                    <div className="flex items-center justify-between mb-3 sm:mb-4">
-                        <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-lg sm:text-xl text-primary">pie_chart</span>
-                        </div>
-                        <span className={`text-xs font-bold ${overallPct >= 75 ? "text-emerald-500" : "text-destructive"}`}>
-                            {overallPct >= 75 ? "On Track" : "At Risk"}
-                        </span>
-                    </div>
-                    <p className={`text-2xl sm:text-3xl font-headline font-extrabold ${overallPct >= 75 ? "text-primary" : "text-destructive"}`}>{overallPct}%</p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Overall Attendance</p>
-                </div>
-                <div className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-secondary/20">
-                    <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl bg-secondary/10 flex items-center justify-center mb-3 sm:mb-4">
-                        <span className="material-symbols-outlined text-lg sm:text-xl text-secondary">school</span>
-                    </div>
-                    <p className="text-2xl sm:text-3xl font-headline font-extrabold">{analytics?.classes_joined || 0}</p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Classes Joined</p>
-                </div>
-                <div className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-6 border border-destructive/20">
-                    <div className="w-8 sm:w-10 h-8 sm:h-10 rounded-lg sm:rounded-xl bg-destructive/10 flex items-center justify-center mb-3 sm:mb-4">
-                        <span className="material-symbols-outlined text-lg sm:text-xl text-destructive">warning</span>
-                    </div>
-                    <p className="text-2xl sm:text-3xl font-headline font-extrabold">{analytics?.alerts?.length || 0}</p>
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground font-bold uppercase tracking-widest mt-1">Attendance Alerts</p>
-                </div>
+                <StatCard
+                    icon="pie_chart"
+                    value={`${overallPct}%`}
+                    label="Overall Attendance"
+                    color={overallPct >= 75 ? "primary" : "destructive"}
+                />
+                <StatCard icon="school" value={analytics?.classes_joined || 0} label="Classes Joined" color="secondary" />
+                <StatCard icon="warning" value={analytics?.alerts?.length || 0} label="Attendance Alerts" color="destructive" />
             </div>
 
             {/* Alerts */}
             {analytics?.alerts?.length > 0 && (
                 <div className="space-y-2">
                     {analytics.alerts.map((alert, i) => (
-                        <div key={i} data-testid={`alert-${i}`} className="bg-destructive/10 border border-destructive/20 rounded-xl px-4 py-3 text-sm text-destructive flex items-center gap-3">
+                        <div key={i} data-testid={`alert-${i}`} className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-sm text-red-600 flex items-center gap-3">
                             <span className="material-symbols-outlined text-base">error</span>
                             {alert}
                         </div>
@@ -93,42 +72,42 @@ export default function StudentDashboard() {
 
             {/* Class List */}
             <div>
-                <h3 className="font-headline text-lg sm:text-xl font-bold mb-4">Your Classes</h3>
+                <h3 className="font-headline text-lg sm:text-xl font-bold mb-4 text-[#1A1A2E]">Your Classes</h3>
                 <div className="space-y-3">
                     {classes.map(cls => {
                         const pct = cls.attendance_percentage || 0;
-                        const barColor = pct >= 75 ? "bg-primary" : pct >= 50 ? "bg-secondary" : "bg-destructive";
+                        const barColor = pct >= 75 ? "bg-[#6D5AC1]" : pct >= 50 ? "bg-[#C9A84C]" : "bg-red-500";
                         return (
                             <div
                                 key={cls.id}
                                 data-testid={`student-class-${cls.id}`}
-                                className="glass-card rounded-xl sm:rounded-2xl p-4 sm:p-5 border border-border/50 hover:border-primary/20 transition-all cursor-pointer group"
+                                className="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200/60 shadow-sm hover:shadow-md hover:border-[#6D5AC1]/20 transition-all cursor-pointer group"
                                 onClick={() => navigate(`/classes/${cls.id}`)}
                             >
                                 <div className="flex items-center justify-between mb-3">
                                     <div>
-                                        <h4 className="font-headline font-bold text-sm sm:text-base group-hover:text-primary transition-colors">{cls.name}</h4>
-                                        <p className="text-xs text-muted-foreground">{cls.subject} - {cls.teacher_name}</p>
+                                        <h4 className="font-headline font-bold text-sm sm:text-base text-[#1A1A2E] group-hover:text-[#6D5AC1] transition-colors">{cls.name}</h4>
+                                        <p className="text-xs text-gray-500">{cls.subject} - {cls.teacher_name}</p>
                                     </div>
-                                    <span className={`text-xl sm:text-2xl font-headline font-extrabold ${pct >= 75 ? "text-primary" : "text-destructive"}`}>
+                                    <span className={`text-xl sm:text-2xl font-headline font-extrabold ${pct >= 75 ? "text-[#6D5AC1]" : "text-red-500"}`}>
                                         {pct}%
                                     </span>
                                 </div>
-                                <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+                                <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
                                     <div className={`h-full ${barColor} rounded-full transition-all duration-500`} style={{ width: `${pct}%` }} />
                                 </div>
-                                <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
+                                <div className="flex items-center justify-between mt-3 text-xs text-gray-500">
                                     <span>{cls.total_sessions || 0} sessions</span>
-                                    <span className="material-symbols-outlined text-muted-foreground group-hover:text-primary transition-colors text-base">arrow_forward</span>
+                                    <span className="material-symbols-outlined text-gray-300 group-hover:text-[#6D5AC1] transition-colors text-base">arrow_forward</span>
                                 </div>
                             </div>
                         );
                     })}
                     {classes.length === 0 && (
-                        <div className="text-center py-12 sm:py-16 glass-card rounded-2xl border border-border/50">
-                            <span className="material-symbols-outlined text-4xl text-muted-foreground/30 mb-4">school</span>
-                            <p className="text-muted-foreground mb-2">No classes yet</p>
-                            <button onClick={() => navigate("/classes/join")} className="text-primary font-bold text-sm hover:underline">Join your first class</button>
+                        <div className="text-center py-12 sm:py-16 bg-white rounded-2xl border border-gray-200/60 shadow-sm">
+                            <span className="material-symbols-outlined text-4xl text-gray-300 mb-4">school</span>
+                            <p className="text-gray-500 mb-2">No classes yet</p>
+                            <button onClick={() => navigate("/classes/join")} className="text-[#6D5AC1] font-bold text-sm hover:underline">Join your first class</button>
                         </div>
                     )}
                 </div>

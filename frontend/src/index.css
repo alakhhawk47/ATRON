@@ -5,67 +5,37 @@
 @tailwind utilities;
 
 @layer base {
-    /* ═══════════════════════════════════════════════
-       DARK MODE (default)
-       ═══════════════════════════════════════════════ */
     :root {
-        --background: 228 59% 6%;
-        --foreground: 0 0% 100%;
-        --card: 0 0% 7.5%;
-        --card-foreground: 0 0% 100%;
-        --popover: 0 0% 7.5%;
-        --popover-foreground: 0 0% 100%;
-        --primary: 195 100% 71%;
-        --primary-foreground: 228 59% 6%;
-        --secondary: 37 98% 51%;
-        --secondary-foreground: 0 0% 100%;
-        --muted: 0 0% 15%;
-        --muted-foreground: 0 0% 68%;
-        --accent: 0 0% 15%;
-        --accent-foreground: 0 0% 100%;
-        --destructive: 352 100% 65%;
-        --destructive-foreground: 0 0% 100%;
-        --border: 0 0% 18%;
-        --input: 0 0% 18%;
-        --ring: 195 100% 71%;
-        --radius: 0.75rem;
-        --chart-1: 195 100% 71%;
-        --chart-2: 37 98% 51%;
-        --chart-3: 352 100% 72%;
-        --chart-4: 160 60% 45%;
-        --chart-5: 280 65% 60%;
-    }
-
-    /* ═══════════════════════════════════════════════
-       LIGHT MODE
-       Warm cream/beige + purple + olive palette
-       from Stitch designs
-       ═══════════════════════════════════════════════ */
-    .light {
-        --background: 42 30% 93%;
-        --foreground: 30 10% 15%;
-        --card: 40 28% 97%;
-        --card-foreground: 30 10% 15%;
-        --popover: 40 28% 97%;
-        --popover-foreground: 30 10% 15%;
-        --primary: 270 30% 42%;
+        /* ═══════════════════════════════════════════════
+           ATRON Design System — Purple + Beige + Soft UI
+           ═══════════════════════════════════════════════ */
+        --background: 45 33% 96%;
+        --foreground: 230 25% 12%;
+        --card: 0 0% 100%;
+        --card-foreground: 230 25% 12%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 230 25% 12%;
+        --primary: 258 40% 55%;
         --primary-foreground: 0 0% 100%;
-        --secondary: 55 30% 50%;
-        --secondary-foreground: 0 0% 100%;
-        --muted: 42 22% 88%;
-        --muted-foreground: 30 10% 45%;
-        --accent: 270 25% 92%;
-        --accent-foreground: 270 30% 30%;
-        --destructive: 0 65% 50%;
+        --secondary: 45 48% 64%;
+        --secondary-foreground: 230 25% 12%;
+        --muted: 42 22% 90%;
+        --muted-foreground: 220 9% 43%;
+        --accent: 258 30% 94%;
+        --accent-foreground: 258 40% 35%;
+        --destructive: 4 72% 56%;
         --destructive-foreground: 0 0% 100%;
-        --border: 40 15% 82%;
-        --input: 40 15% 82%;
-        --ring: 270 30% 42%;
-        --chart-1: 270 30% 42%;
-        --chart-2: 55 30% 50%;
-        --chart-3: 0 65% 55%;
-        --chart-4: 160 40% 42%;
-        --chart-5: 195 60% 50%;
+        --success: 152 55% 41%;
+        --success-foreground: 0 0% 100%;
+        --border: 40 18% 87%;
+        --input: 40 18% 87%;
+        --ring: 258 40% 55%;
+        --radius: 1.5rem;
+        --chart-1: 258 40% 55%;
+        --chart-2: 45 48% 64%;
+        --chart-3: 4 72% 56%;
+        --chart-4: 152 55% 41%;
+        --chart-5: 200 60% 50%;
     }
 }
 
@@ -98,104 +68,48 @@
         font-family: 'Manrope', sans-serif;
     }
 
-    /* ── Glass Cards ─────────────────────────────── */
+    /* ── Solid Cards ─────────────────────────────── */
     .glass-card {
-        background: rgba(38, 38, 38, 0.5);
-        backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-    }
-    .light .glass-card {
-        background: rgba(255, 255, 255, 0.75);
-        box-shadow: 0 2px 16px rgba(107, 91, 149, 0.06), 0 1px 4px rgba(0,0,0,0.04);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        background: hsl(var(--card));
+        box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(109,90,193,0.06);
     }
 
     .glass-panel {
-        background: rgba(19, 19, 19, 0.8);
-        backdrop-filter: blur(20px);
-        -webkit-backdrop-filter: blur(20px);
-    }
-    .light .glass-panel {
-        background: rgba(255, 255, 255, 0.85);
-        box-shadow: 0 4px 24px rgba(107, 91, 149, 0.08);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
+        background: hsl(var(--card));
+        box-shadow: 0 4px 24px rgba(109,90,193,0.08), 0 1px 4px rgba(0,0,0,0.04);
     }
 
     /* ── Gradient Texts ──────────────────────────── */
     .text-gradient-primary {
-        background: linear-gradient(135deg, #69daff, #00cffc, #fd9d06);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    .light .text-gradient-primary {
-        background: linear-gradient(135deg, #6B5B95, #8B7BAF, #7A6F4E);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: hsl(var(--primary));
     }
 
     .editorial-text {
-        background: linear-gradient(135deg, #69daff 0%, #ffffff 40%, #fd9d06 70%, #fd4b6c 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    .light .editorial-text {
-        background: linear-gradient(135deg, #3D2F5C 0%, #6B5B95 40%, #7A6F4E 70%, #5C573D 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+        color: hsl(var(--foreground));
     }
 
-    /* ── Glow Effects ────────────────────────────── */
+    /* ── Glow Effects (soft purple) ──────────────── */
     .neon-glow {
-        box-shadow: 0 0 30px rgba(105, 218, 255, 0.3);
-    }
-    .light .neon-glow {
-        box-shadow: 0 4px 20px rgba(107, 91, 149, 0.25);
+        box-shadow: 0 4px 20px rgba(109,90,193,0.20);
     }
 
     .neon-glow-primary {
-        box-shadow: 0 0 40px rgba(105, 218, 255, 0.15), 0 0 80px rgba(105, 218, 255, 0.05);
-    }
-    .light .neon-glow-primary {
-        box-shadow: 0 4px 24px rgba(107, 91, 149, 0.1), 0 1px 6px rgba(0,0,0,0.04);
+        box-shadow: 0 4px 24px rgba(109,90,193,0.12), 0 1px 6px rgba(0,0,0,0.04);
     }
 
-    /* ── Ghost Border ────────────────────────────── */
+    /* ── Ghost Border (soft purple gradient) ────── */
     .ghost-border {
-        border: 1px solid transparent;
-        background-clip: padding-box;
-        position: relative;
+        border: 1px solid hsl(var(--border));
     }
     .ghost-border::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: inherit;
-        padding: 1px;
-        background: linear-gradient(135deg, rgba(105,218,255,0.2), transparent, rgba(253,157,6,0.2));
-        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: xor;
-        mask-composite: exclude;
-        pointer-events: none;
-    }
-    .light .ghost-border::before {
-        background: linear-gradient(135deg, rgba(107,91,149,0.2), transparent, rgba(122,111,78,0.2));
+        display: none;
     }
 
     .kinetic-gradient {
-        background: linear-gradient(135deg, rgba(105,218,255,0.05), rgba(253,157,6,0.03), rgba(253,75,108,0.03));
-    }
-    .light .kinetic-gradient {
-        background: linear-gradient(135deg, rgba(107,91,149,0.04), rgba(122,111,78,0.03), rgba(200,190,170,0.03));
+        background: transparent;
     }
 
-    /* ── Scrollbar + Material Icons ──────────────── */
+    /* ── Scrollbar ──────────────────────────────── */
     .no-scrollbar::-webkit-scrollbar {
         display: none;
     }
@@ -207,90 +121,89 @@
         font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
     }
 
-    /* ── Theme-aware Component Classes ────────────
-       These provide convenient single-class styling
-       that auto-adapts to the current theme
-       ─────────────────────────────────────────────── */
+    /* ══════════════════════════════════════════════
+       Theme-aware Component Classes
+       Purple + Beige SaaS Design System
+       ══════════════════════════════════════════════ */
 
     /* Nav bar */
     .theme-nav {
-        @apply bg-neutral-950/60 backdrop-blur-xl border-b border-neutral-800/50;
-        box-shadow: 0 8px 32px 0 rgba(0,0,0,0.36);
-    }
-    .light .theme-nav {
-        @apply bg-white/70 backdrop-blur-xl border-b border-neutral-200/60;
-        box-shadow: 0 2px 12px rgba(107, 91, 149, 0.06);
+        @apply bg-white/80 backdrop-blur-xl border-b;
+        border-color: hsl(var(--border));
+        box-shadow: 0 1px 8px rgba(0,0,0,0.04);
     }
 
     /* Sidebar */
     .theme-sidebar {
-        @apply bg-neutral-900/80 backdrop-blur-2xl border-r border-neutral-800/50;
-    }
-    .light .theme-sidebar {
-        @apply bg-white/80 backdrop-blur-2xl border-r border-neutral-200/50;
+        @apply bg-white border-r;
+        border-color: hsl(var(--border));
     }
 
     /* Input fields */
     .theme-input {
-        @apply bg-neutral-900/80 border border-neutral-700/30 text-white placeholder:text-neutral-600;
+        @apply bg-white border text-foreground;
+        border-color: hsl(var(--border));
     }
-    .light .theme-input {
-        @apply bg-white border border-neutral-300/60 text-neutral-900 placeholder:text-neutral-400;
+    .theme-input::placeholder {
+        color: hsl(var(--muted-foreground));
     }
 
-    /* Buttons – primary */
+    /* Buttons – primary (purple pill) */
     .theme-btn-primary {
-        @apply bg-gradient-to-r from-cyan-400 to-cyan-500 text-neutral-950 font-bold;
+        @apply font-bold text-white;
+        background: linear-gradient(135deg, hsl(258, 40%, 55%), hsl(258, 45%, 48%));
+        border-radius: 999px;
+        transition: all 0.2s ease;
     }
-    .light .theme-btn-primary {
-        @apply bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold;
+    .theme-btn-primary:hover {
+        background: linear-gradient(135deg, hsl(258, 45%, 48%), hsl(258, 50%, 42%));
+        box-shadow: 0 4px 16px rgba(109,90,193,0.3);
     }
 
-    /* Buttons – outline */
+    /* Buttons – outline (pill) */
     .theme-btn-outline {
-        @apply border border-neutral-700 text-white;
+        @apply border text-foreground;
+        border-color: hsl(var(--border));
+        border-radius: 999px;
     }
-    .light .theme-btn-outline {
-        @apply border border-neutral-300 text-neutral-700;
+    .theme-btn-outline:hover {
+        background: hsl(var(--muted));
+    }
+
+    /* Buttons – gold accent */
+    .theme-btn-gold {
+        @apply font-bold;
+        background: linear-gradient(135deg, hsl(45, 48%, 64%), hsl(45, 52%, 56%));
+        color: hsl(230, 25%, 12%);
+        border-radius: 999px;
+    }
+    .theme-btn-gold:hover {
+        box-shadow: 0 4px 16px rgba(210,193,117,0.3);
     }
 
     /* Primary color text */
     .theme-primary {
-        @apply text-cyan-400;
-    }
-    .light .theme-primary {
-        @apply text-purple-700;
+        color: hsl(var(--primary));
     }
 
     /* Secondary color text */
     .theme-secondary {
-        @apply text-amber-400;
-    }
-    .light .theme-secondary {
-        @apply text-yellow-700;
+        color: hsl(var(--secondary));
     }
 
     /* Muted text */
     .theme-muted {
-        @apply text-neutral-500;
-    }
-    .light .theme-muted {
-        @apply text-neutral-500;
+        color: hsl(var(--muted-foreground));
     }
 
     /* Card border variants */
     .theme-card-border {
-        @apply border border-neutral-800/50;
-    }
-    .light .theme-card-border {
-        @apply border border-neutral-200/80;
+        @apply border;
+        border-color: hsl(var(--border));
     }
 
     /* Subtle bg for stat icons */
     .theme-icon-bg-primary {
-        @apply bg-cyan-400/10;
-    }
-    .light .theme-icon-bg-primary {
-        @apply bg-purple-100;
+        background: hsl(258, 40%, 55%, 0.1);
     }
 }
